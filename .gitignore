@@ -1,4 +1,5 @@
 # Nix build artifacts
+/result
 result/
 
 # Rust build artifacts
