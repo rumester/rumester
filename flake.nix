@@ -10,16 +10,19 @@
       );
   in {
     packages = forAllSystems (pkgs: rec {
+      common = pkgs.callPackage ./common/default.nix {};
       cli = pkgs.callPackage ./cli/default.nix {};
       default = pkgs.symlinkJoin {
         name = "rumester";
         paths = [
+          common
           cli
         ];
       };
     });
 
     devShells = forAllSystems (pkgs: {
+      common = pkgs.callPackage ./common/shell.nix {};
       cli = pkgs.callPackage ./cli/shell.nix {};
     });
 
