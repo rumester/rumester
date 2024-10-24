@@ -8,6 +8,49 @@ pub struct Package {
     pub zipsize: i64,
 }
 
+impl Package {
+    pub fn get_extraction_dir(&self) -> String {
+        let res = match self.name.as_str() {
+            "ApplicationConfig.zip" => "ApplicationConfig",
+            "BuiltInPlugins.zip" => "BuiltInPlugins",
+            "BuiltInStandalonePlugins.zip" => "BuiltInStandalonePlugins",
+            "Plugins.zip" => "Plugins",
+            "Qml.zip" => "Qml",
+            "RibbonConfig.zip" => "RibbonConfig",
+            "StudioFonts.zip" => "StudioFonts",
+            "WebView2.zip" => ".",
+            "WebView2RuntimeInstaller.zip" => "WebView2RuntimeInstaller",
+            "RobloxStudio.zip" => ".",
+            "Libraries.zip" => ".",
+            "LibrariesQt5.zip" => ".",
+            "content-avatar.zip" => "content/avatar",
+            "content-configs.zip" => "content/configs",
+            "content-fonts.zip" => "content/fonts",
+            "content-models.zip" => "content/models",
+            "content-qt_translations.zip" => "content/qt_translations",
+            "content-sky.zip" => "content/sky",
+            "content-sounds.zip" => "content/sounds",
+            "shaders.zip" => "shaders",
+            "ssl.zip" => "ssl",
+            "content-textures2.zip" => "content/textures",
+            "content-textures3.zip" => "PlatformContent/pc/textures",
+            "content-studio_svg_textures.zip" => "content/studio_svg_textures",
+            "content-terrain.zip" => "PlatformContent/pc/terrain",
+            "content-platform-fonts.zip" => "PlatformContent/pc/fonts",
+            "content-api-docs.zip" => "content/api_docs",
+            "extracontent-scripts.zip" => "ExtraContent/scripts",
+            "extracontent-luapackages.zip" => "ExtraContent/LuaPackages",
+            "extracontent-translations.zip" => "ExtraContent/translations",
+            "extracontent-models.zip" => "ExtraContent/models",
+            "extracontent-textures.zip" => "ExtraContent/textures",
+            "redist.zip" => ".",
+            _ => todo!()
+        };
+
+        res.into()
+    }
+}
+
 fn parse_rbx_pkg_manifest(manifest: &str) -> Vec<Package> {
     let mut packages: Vec<Package> = Vec::new();
     let package_manifests: Vec<&str> = manifest.split("\r\n").collect();
@@ -66,7 +109,7 @@ pub async fn get_mirror() -> Result<String, String> {
 
 pub async fn get_mirror_packages(
     mirror: &str,
-    deployment: ClientDeployment,
+    deployment: &ClientDeployment,
 ) -> Result<Vec<Package>, Box<dyn std::error::Error>> {
     let url = format!(
         "{mirror}/{}-rbxPkgManifest.txt",
