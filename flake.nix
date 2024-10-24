@@ -10,15 +10,18 @@
       );
   in {
     packages = forAllSystems (pkgs: rec {
-      example = pkgs.callPackage ./default.nix {};
-      default = example;
+      cli = pkgs.callPackage ./cli/default.nix {};
+      default = pkgs.symlinkJoin {
+        name = "rumester";
+        paths = [
+          cli
+        ];
+      };
     });
 
     devShells = forAllSystems (pkgs: {
-      default = pkgs.callPackage ./shell.nix {};
+      cli = pkgs.callPackage ./cli/shell.nix {};
     });
-
-    overlays.default = final: _: {example = final.callPackage ./default.nix {};};
 
     formatter = forAllSystems (pkgs: pkgs.alejandra);
   };
