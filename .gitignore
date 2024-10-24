@@ -1,0 +1,5 @@
+# Nix build artifacts
+result/
+
+# Rust build artifacts
+target/
