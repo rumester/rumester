@@ -1,7 +1,7 @@
 use serde::Deserialize;
 
 #[derive(Deserialize)]
-pub struct ClientVersionResponse {
+pub struct ClientDeployment {
     pub version: String,
     #[serde(rename = "clientVersionUpload")]
     pub client_version_upload: String,
@@ -10,7 +10,7 @@ pub struct ClientVersionResponse {
 pub async fn get_client_version(
     binary_type: &str,
     channel: Option<&str>,
-) -> Result<ClientVersionResponse, Box<dyn std::error::Error>> {
+) -> Result<ClientDeployment, Box<dyn std::error::Error>> {
     let mut url = format!(
         "https://clientsettings.roblox.com/v2/client-version/{}",
         binary_type
@@ -23,7 +23,7 @@ pub async fn get_client_version(
         binary_type
     ))
     .await?
-    .json::<ClientVersionResponse>()
+    .json::<ClientDeployment>()
     .await?;
 
     Ok(res)
