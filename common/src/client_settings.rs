@@ -16,6 +16,34 @@ impl ClientDeployment {
         get_deployments_dir().join(&self.client_version_upload)
     }
 
+    pub fn get_webview_installer_dir(&self) -> PathBuf {
+        self.get_install_dir()
+            .join("WebView2RuntimeInstaller/MicrosoftEdgeWebview2Setup.exe")
+    }
+
+    fn get_webview_state_dir(&self) -> PathBuf {
+        let path = self.get_install_dir().join("rumester_webview_state");
+        if !path.exists() {
+            fs::write(&path, "0").expect("Failed to create webview state file");
+        }
+        path
+    }
+
+    pub fn get_webview_installed(&self) -> bool {
+        let state_file = fs::read_to_string(self.get_webview_state_dir())
+            .expect("Failed to read webview state file!");
+
+        state_file == "1"
+    }
+
+    pub fn set_webview_installed(&self, installed: bool) {
+        fs::write(
+            self.get_webview_state_dir(),
+            if installed { "1" } else { "0" },
+        )
+        .expect("Failed to write webview state!");
+    }
+
     pub fn is_installed(&self) -> bool {
         self.get_install_dir().exists()
     }

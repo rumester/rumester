@@ -57,7 +57,7 @@ async fn main() {
                 }
                 write_app_settings_xml(&latest_version);
             }
-            if install_webview2(app.into()).await.is_err() {
+            if install_webview2(app.into(), &latest_version).await.is_err() {
                 eprintln!("Failed to install Webview2!");
             } else {
                 println!("Installed Webview2.");

@@ -51,7 +51,3 @@ pub fn get_download_dir() -> PathBuf {
     }
     path
 }
-
-pub fn get_webview_installer_dir() -> PathBuf {
-    get_download_dir().join("webview_installer.exe")
-}
