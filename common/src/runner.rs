@@ -8,6 +8,15 @@ use crate::app_data::{get_prefix_dir, get_wineroot};
 
 pub fn run_windows_binary(binary_file: PathBuf, app_name: String) -> Result<Child, String> {
     println!("Running {}", binary_file.to_str().unwrap());
+    #[cfg(target_os = "windows")]
+    {
+        let child = std::process::Command::new(binary_file)
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped())
+            .spawn()
+            .unwrap();
+        return Ok(child);
+    }
     let prefix_path = get_prefix_dir().join(app_name);
     if !prefix_path.exists() {
         fs::create_dir_all(&prefix_path).unwrap();
@@ -17,10 +26,7 @@ pub fn run_windows_binary(binary_file: PathBuf, app_name: String) -> Result<Chil
     } else {
         None
     };
-    let wine = winers::Wine::new(
-        prefix_path.to_str().unwrap(),
-        wineroot,
-    );
+    let wine = winers::Wine::new(prefix_path.to_str().unwrap(), wineroot);
     if let Err(e) = wine.init() {
         panic!("Error initializing wine: {e}");
     }
