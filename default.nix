@@ -1,10 +1,14 @@
 {
   lib,
   rustPlatform,
+  makeWrapper,
   pkg-config,
   openssl,
+  wine64Packages,
 }: let
   toml = (lib.importTOML ./Cargo.toml).workspace.package;
+
+  wine = wine64Packages.staging;
 in
   rustPlatform.buildRustPackage rec {
     pname = toml.name;
@@ -14,6 +18,7 @@ in
 
     nativeBuildInputs = [
       pkg-config
+      makeWrapper
     ];
 
     buildInputs = [
@@ -30,4 +35,9 @@ in
     };
 
     meta.mainProgram = pname;
+
+    postInstall = ''
+      wrapProgram $out/bin/cli \
+        --prefix PATH : ${lib.makeBinPath [wine]}
+    '';
   }
