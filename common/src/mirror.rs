@@ -11,6 +11,7 @@ pub struct Package {
 impl Package {
     pub fn get_extraction_dir(&self) -> String {
         let res = match self.name.as_str() {
+            "RobloxApp.zip" => ".",
             "ApplicationConfig.zip" => "ApplicationConfig",
             "BuiltInPlugins.zip" => "BuiltInPlugins",
             "BuiltInStandalonePlugins.zip" => "BuiltInStandalonePlugins",
@@ -37,6 +38,7 @@ impl Package {
             "content-studio_svg_textures.zip" => "content/studio_svg_textures",
             "content-terrain.zip" => "PlatformContent/pc/terrain",
             "content-platform-fonts.zip" => "PlatformContent/pc/fonts",
+            "extracontent-places.zip" => "ExtraContent/places",
             "content-api-docs.zip" => "content/api_docs",
             "extracontent-scripts.zip" => "ExtraContent/scripts",
             "extracontent-luapackages.zip" => "ExtraContent/LuaPackages",

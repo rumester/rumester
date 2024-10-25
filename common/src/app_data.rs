@@ -11,3 +11,15 @@ pub fn get_deployments_download_dir() -> PathBuf {
 pub fn get_deployments_dir() -> PathBuf {
     get_appdata_dir().join("deployments")
 }
+
+pub fn get_prefix_dir() -> PathBuf {
+    get_appdata_dir().join("prefixes")
+}
+
+pub fn get_wineroot() -> Option<PathBuf> {
+    if let Ok(wineroot) = std::env::var("WINEROOT") {
+        Some(PathBuf::from(wineroot))
+    } else {
+        None
+    }
+}

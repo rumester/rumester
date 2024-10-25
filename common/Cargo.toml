@@ -8,4 +8,5 @@ bytes = "1.8.0"
 dirs = "5.0.1"
 reqwest = { version = "0.12.8", features = ["json"] }
 serde = { version = "1.0.213", features = ["serde_derive"] }
+winers = { git = "https://github.com/rumester/winers", version = "0.0.1", rev = "87ed1f235962115d8f40f663e47b6102bde6cb59" }
 zip = "2.2.0"

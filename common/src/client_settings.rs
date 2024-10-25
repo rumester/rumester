@@ -16,6 +16,10 @@ impl ClientDeployment {
         get_deployments_dir().join(&self.client_version_upload)
     }
 
+    pub fn is_installed(&self) -> bool {
+        self.get_install_dir().exists()
+    }
+
     pub fn setup_deployment_dir(&self) -> Result<(), io::Error> {
         let target_dir = self.get_install_dir();
         if target_dir.exists() {
