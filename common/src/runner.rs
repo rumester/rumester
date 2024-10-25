@@ -38,6 +38,16 @@ pub async fn install_webview2(
     app_name: &String,
     deployment: &ClientDeployment,
 ) -> Result<(), String> {
+    #[cfg(target_os = "linux")]
+    {
+        let wine = winers::Wine::new(
+            ensure_prefix_exists(app_name).to_str().unwrap(),
+            get_wineroot_string(),
+        );
+        let mut cmd = wine.cmd();
+        cmd.arg("winecfg").arg("/v").arg("win7");
+        cmd.spawn().unwrap().wait().unwrap();
+    }
     if !deployment.get_webview_installed() {
         if let Ok(mut child) = run_windows_binary(deployment.get_webview_installer_dir(), app_name)
         {
