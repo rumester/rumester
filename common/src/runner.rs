@@ -57,7 +57,10 @@ pub async fn download_webview2(webview_installer_url: &str) -> Result<Bytes, Str
 }
 
 fn install_webview_wine(app_name: &String, binary_data: Bytes) -> Result<(), String> {
-    run_windows_binary(get_webview_installer_dir(), &app_name).unwrap();
+    run_windows_binary(get_webview_installer_dir(), &app_name)
+        .unwrap()
+        .wait()
+        .unwrap();
 
     // TODO
     /*
@@ -92,7 +95,8 @@ pub async fn install_webview2(app_name: &String) -> Result<(), String> {
     if let Ok(res) = res {
         #[cfg(target_os = "windows")]
         {
-            if run_windows_binary(get_webview_installer_dir(), app_name).is_ok() {
+            if let Ok(mut child) = run_windows_binary(get_webview_installer_dir(), app_name) {
+                child.wait().unwrap();
                 return Ok(());
             } else {
                 return Err("Failed to execute webview binary".into());
