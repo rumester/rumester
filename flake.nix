@@ -9,21 +9,12 @@
         system: function nixpkgs.legacyPackages.${system}
       );
   in {
-    packages = forAllSystems (pkgs: rec {
-      common = pkgs.callPackage ./common/default.nix {};
-      cli = pkgs.callPackage ./cli/default.nix {};
-      default = pkgs.symlinkJoin {
-        name = "rumester";
-        paths = [
-          common
-          cli
-        ];
-      };
+    packages = forAllSystems (pkgs: {
+      default = pkgs.callPackage ./default.nix {};
     });
 
     devShells = forAllSystems (pkgs: {
-      common = pkgs.callPackage ./common/shell.nix {};
-      cli = pkgs.callPackage ./cli/shell.nix {};
+      default = pkgs.callPackage ./shell.nix {};
     });
 
     formatter = forAllSystems (pkgs: pkgs.alejandra);
