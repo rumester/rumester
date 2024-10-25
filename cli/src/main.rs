@@ -5,7 +5,7 @@ use common::{
     client_settings::get_client_version,
     download::{download_package, install_package, write_app_settings_xml},
     mirror::{get_mirror, get_mirror_packages},
-    runner::run_windows_binary,
+    runner::{install_webview2, run_windows_binary},
 };
 
 #[tokio::main]
@@ -57,10 +57,13 @@ async fn main() {
                 }
                 write_app_settings_xml(&latest_version);
             }
+            if install_webview2(app.into()).await.is_err() {
+                eprintln!("Failed to install Webview2!");
+            } else {
+                println!("Installed Webview2.");
+            }
             let child = run_windows_binary(
-                latest_version
-                    .get_install_dir()
-                    .join(binary_name),
+                latest_version.get_install_dir().join(binary_name),
                 app.into(),
             );
             if let Ok(mut child) = child {
