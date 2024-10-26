@@ -23,17 +23,17 @@ pub async fn download_package(
         deployment.client_version_upload, package.name
     );
     let res = reqwest::get(url).await;
-    if let Ok(res) = res {
-        if let Ok(data) = res.bytes().await {
-            if let Err(_) = fs::write(&package_dir, data.to_vec()) {
-                return Err("Failed to write file!".into());
+    match res {
+        Ok(res) => match res.bytes().await {
+            Ok(data) => {
+                if let Err(e) = fs::write(&package_dir, data.to_vec()) {
+                    return Err(format!("Failed to write file: {e}"));
+                }
+                Ok(data)
             }
-            Ok(data)
-        } else {
-            Err("Failed to get data".into())
-        }
-    } else {
-        Err("Failed to download package.".into())
+            Err(e) => Err(format!("Failed to get data: {e}")),
+        },
+        Err(e) => Err(format!("Failed to download package: {e}")),
     }
 }
 
