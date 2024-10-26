@@ -1,5 +1,3 @@
-use std::io::Read;
-
 use clap::{arg, command};
 use common::{
     client_settings::get_client_version,
@@ -65,10 +63,12 @@ async fn main() {
             let child = run_windows_binary(
                 latest_version.get_install_dir().join(binary_name),
                 app.into(),
-            );
+            ).await;
             if let Ok(child) = child {
                 let output = child.wait_with_output().expect("Failed to run child.");
                 println!("binary exited with status: {}", output.status);
+            } else if let Err(e) = child {
+                panic!("Binary exited unexpectedly: {e}");
             }
         } else {
             println!("Failed to fetch version.");

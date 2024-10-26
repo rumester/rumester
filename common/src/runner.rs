@@ -1,11 +1,13 @@
 use std::{path::PathBuf, process::Child};
 
+use winers::{get_latest_dxvk, install_dxvk};
+
 use crate::{
-    app_data::{ensure_prefix_exists, get_wineroot_string},
+    app_data::{ensure_prefix_exists, get_dxvk_installed, get_wineroot_string, set_dxvk_installed},
     client_settings::ClientDeployment,
 };
 
-pub fn run_windows_binary(binary_file: PathBuf, app_name: &String) -> Result<Child, String> {
+pub async fn run_windows_binary(binary_file: PathBuf, app_name: &String) -> Result<Child, String> {
     println!("Running {}", binary_file.to_str().unwrap());
     #[cfg(target_os = "windows")]
     {
@@ -15,14 +17,33 @@ pub fn run_windows_binary(binary_file: PathBuf, app_name: &String) -> Result<Chi
     let prefix_path = ensure_prefix_exists(&app_name);
     let wine = winers::Wine::new(prefix_path.to_str().unwrap(), get_wineroot_string());
     if let Err(e) = wine.init() {
-        panic!("Error initializing wine: {e}");
+        return Err(format!("Error initializing wine: {}", e));
     }
     if app_name == "studio" {
         // for some reason Roblox Studio likes to explode when on 96 DPi why I don't know but hey it fixes it!
-        if let Err(_) = wine.reg_add(r"HKEY_CURRENT_USER\Control Panel\Desktop", "LogPixels", "REG_DWORD", "97") {
-            println!("Failed to set DPI for Studio prefix, this may result in Studio crashing after the splash screen closes.");
+        if let Err(e) = wine.reg_add(
+            r"HKEY_CURRENT_USER\Control Panel\Desktop",
+            "LogPixels",
+            "REG_DWORD",
+            "97",
+        ) {
+            eprintln!("Failed to set DPI for Studio prefix, this may result in Studio crashing after the splash screen closes. Error info: {e}");
         };
     }
+
+    if !get_dxvk_installed(&wine) {
+        match get_latest_dxvk().await {
+            Ok(latest_dxvk) => {
+                if let Err(e) = install_dxvk(&wine, latest_dxvk.as_str()).await {
+                    eprintln!("Error installing dxvk: {}", e.to_string());
+                } else {
+                    set_dxvk_installed(&wine, true);
+                }
+            }
+            Err(e) => eprintln!("Error fetching latest dxvk: {e}"),
+        }
+    }
+
     let mut cmd = wine.cmd();
     cmd.arg(binary_file);
     let child = cmd.spawn().unwrap();
@@ -44,15 +65,15 @@ pub async fn install_webview2(
             cmd.arg("winecfg").arg("/v").arg("win7");
             cmd.output().expect("Failed to run winecfg");
         }
-        if let Ok(child) = run_windows_binary(deployment.get_webview_installer_dir(), app_name) {
-            deployment.set_webview_installed(true);
-            if child.wait_with_output().is_ok() {
-                Ok(())
-            } else {
-                Err("Failed to install webview!".into())
+        match run_windows_binary(deployment.get_webview_installer_dir(), app_name).await {
+            Ok(child) => {
+                deployment.set_webview_installed(true);
+                match child.wait_with_output() {
+                    Ok(_) => Ok(()),
+                    Err(e) => Err(format!("Failed to install webview: {}", e.to_string()).into()),
+                }
             }
-        } else {
-            Err("Failed to run webview installer!".into())
+            Err(e) => Err(format!("Failed to run webview installer: {e}").into()),
         }
     } else {
         Ok(())

@@ -9,5 +9,5 @@ dirs = "5.0.1"
 pe-parser = "0.6.0"
 reqwest = { version = "0.12.8", features = ["json"] }
 serde = { version = "1.0.213", features = ["serde_derive"] }
-winers = { git = "https://github.com/rumester/winers", version = "0.0.1", rev = "cb4ff9ac6320b14631d1764cbfc1956199e29219" }
+winers = { git = "https://github.com/rumester/winers", version = "0.0.1", rev = "eebb54c0a5b31c5945bf37ce211abdf4aed51506" }
 zip = "2.2.0"

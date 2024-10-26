@@ -1,5 +1,7 @@
 use std::{fs, path::PathBuf};
 
+use winers::Wine;
+
 use crate::mirror::Package;
 
 pub fn get_appdata_dir() -> PathBuf {
@@ -61,4 +63,21 @@ pub fn get_package_dir(package: &Package) -> PathBuf {
         fs::create_dir_all(&packages_dir).expect("Failed to create download cache dir!");
     }
     path
+}
+
+fn get_dxvk_state_dir(wine: &Wine) -> PathBuf {
+    wine.prefix_path.join("dxvk_state")
+}
+
+pub fn get_dxvk_installed(wine: &Wine) -> bool {
+    if let Ok(state) = fs::read_to_string(get_dxvk_state_dir(wine)) {
+        state == "1"
+    } else {
+        false
+    }
+}
+
+pub fn set_dxvk_installed(wine: &Wine, installed: bool) {
+    fs::write(get_dxvk_state_dir(wine), if installed { "1" } else { "0" })
+        .expect("Failed to set DXVK installed state.");
 }

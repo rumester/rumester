@@ -2148,7 +2148,7 @@ checksum = "589f6da84c646204747d1270a2a5661ea66ed1cced2631d546fdfb155959f9ec"
 [[package]]
 name = "winers"
 version = "0.0.1"
-source = "git+https://github.com/rumester/winers?rev=cb4ff9ac6320b14631d1764cbfc1956199e29219#cb4ff9ac6320b14631d1764cbfc1956199e29219"
+source = "git+https://github.com/rumester/winers?rev=eebb54c0a5b31c5945bf37ce211abdf4aed51506#eebb54c0a5b31c5945bf37ce211abdf4aed51506"
 dependencies = [
  "flate2",
  "reqwest 0.11.27",
