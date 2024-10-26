@@ -39,19 +39,31 @@ async fn main() {
                 let packages = get_mirror_packages(mirror.as_str(), latest_version)
                     .await
                     .expect(format!("Failed to fetch packages from {mirror}").as_str());
-                for package in packages {
-                    println!(
-                        "Package {}: checksum: {}, size: {}, zipsize: {}",
-                        package.name, package.checksum, package.size, package.zipsize
-                    );
-                    if package.name == "RobloxPlayerLauncher.exe" {
-                        continue;
-                    }
-                    let data = download_package(mirror.as_str(), latest_version, &package)
-                        .await
-                        .expect(format!("Failed to download {}", package.name).as_str());
-                    install_package(&package, &latest_version, &data)
-                        .expect("Failed to install package.");
+                let tasks: Vec<_> = packages
+                    .clone()
+                    .iter()
+                    .map(|package| {
+                        let package: common::mirror::Package = package.clone();
+                        let mirror = mirror.clone();
+                        let latest_version = latest_version.clone();
+                        tokio::spawn(async move {
+                            println!(
+                                "Package {}: checksum: {}, size: {}, zipsize: {}",
+                                package.name, package.checksum, package.size, package.zipsize
+                            );
+                            if package.name == "RobloxPlayerLauncher.exe" {
+                                return;
+                            }
+                            let data = download_package(mirror.as_str(), &latest_version, &package)
+                                .await
+                                .expect(format!("Failed to download {}", package.name).as_str());
+                            install_package(&package, &latest_version, &data)
+                                .expect("Failed to install package.");
+                        })
+                    })
+                    .collect();
+                for task in tasks {
+                    task.await.expect("Failed to run task");
                 }
                 write_app_settings_xml(&latest_version);
             }
@@ -63,7 +75,8 @@ async fn main() {
             let child = run_windows_binary(
                 latest_version.get_install_dir().join(binary_name),
                 app.into(),
-            ).await;
+            )
+            .await;
             if let Ok(child) = child {
                 let output = child.wait_with_output().expect("Failed to run child.");
                 println!("binary exited with status: {}", output.status);

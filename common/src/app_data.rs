@@ -5,7 +5,11 @@ use winers::Wine;
 use crate::mirror::Package;
 
 pub fn get_appdata_dir() -> PathBuf {
-    dirs::data_local_dir().unwrap().join("rumester")
+    let appdata = dirs::data_local_dir().unwrap().join("rumester");
+    if !appdata.exists() {
+        fs::create_dir_all(&appdata).unwrap();
+    }
+    appdata
 }
 
 pub fn get_cache_dir() -> PathBuf {
@@ -65,19 +69,42 @@ pub fn get_package_dir(package: &Package) -> PathBuf {
     path
 }
 
-fn get_dxvk_state_dir(wine: &Wine) -> PathBuf {
-    wine.prefix_path.join("dxvk_state")
-}
-
-pub fn get_dxvk_installed(wine: &Wine) -> bool {
-    if let Ok(state) = fs::read_to_string(get_dxvk_state_dir(wine)) {
+pub fn read_state_file(path: PathBuf) -> bool {
+    if let Ok(state) = fs::read_to_string(path) {
         state == "1"
     } else {
         false
     }
 }
 
-pub fn set_dxvk_installed(wine: &Wine, installed: bool) {
-    fs::write(get_dxvk_state_dir(wine), if installed { "1" } else { "0" })
+pub fn write_state_file(path: PathBuf, installed: bool) {
+    fs::write(path, if installed { "1" } else { "0" })
         .expect("Failed to set DXVK installed state.");
+}
+
+fn get_dxvk_state_dir(wine: &Wine) -> PathBuf {
+    wine.prefix_path.join("dxvk_state")
+}
+
+pub fn get_dxvk_installed(wine: &Wine) -> bool {
+    read_state_file(get_dxvk_state_dir(wine))
+}
+
+pub fn set_dxvk_installed(wine: &Wine, installed: bool) {
+    write_state_file(get_dxvk_state_dir(wine), installed)
+}
+
+pub fn get_webview_state_dir(wine: &Option<Wine>) -> PathBuf {
+    if let Some(wine) = wine {
+        return wine.prefix_path.join("webview_state");
+    }
+    get_appdata_dir().join("webview_state")
+}
+
+pub fn get_webview_installed(wine: &Option<Wine>) -> bool {
+    read_state_file(get_webview_state_dir(wine))
+}
+
+pub fn set_webview_installed(wine: &Option<Wine>, installed: bool) {
+    write_state_file(get_webview_state_dir(wine), installed);
 }

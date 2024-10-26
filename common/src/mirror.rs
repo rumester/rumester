@@ -1,6 +1,6 @@
 use crate::client_settings::ClientDeployment;
 
-#[derive(serde::Deserialize)]
+#[derive(serde::Deserialize, Clone)]
 pub struct Package {
     pub name: String,
     pub checksum: String,

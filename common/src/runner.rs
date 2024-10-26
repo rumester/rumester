@@ -1,9 +1,12 @@
 use std::{path::PathBuf, process::Child};
 
-use winers::{get_latest_dxvk, install_dxvk};
+use winers::{get_latest_dxvk, install_dxvk, Wine};
 
 use crate::{
-    app_data::{ensure_prefix_exists, get_dxvk_installed, get_wineroot_string, set_dxvk_installed},
+    app_data::{
+        ensure_prefix_exists, get_dxvk_installed, get_webview_installed, get_wineroot_string,
+        set_dxvk_installed, set_webview_installed,
+    },
     client_settings::ClientDeployment,
 };
 
@@ -51,26 +54,49 @@ pub async fn run_windows_binary(binary_file: PathBuf, app_name: &String) -> Resu
     Ok(child)
 }
 
+#[cfg(target_os = "linux")]
+pub fn set_wine_windows_version(wine: &Wine, version: &str) {
+    let mut cmd = wine.cmd();
+    cmd.arg("winecfg").arg("/v").arg(version);
+    cmd.output().expect("Failed to run winecfg");
+}
+
 pub async fn install_webview2(
     app_name: &String,
     deployment: &ClientDeployment,
 ) -> Result<(), String> {
-    if !deployment.get_webview_installed() {
+    #[cfg(target_os = "linux")]
+    let wine = Some(winers::Wine::new(
+        ensure_prefix_exists(app_name).to_str().unwrap(),
+        get_wineroot_string(),
+    ));
+    #[cfg(target_os = "windows")]
+    let wine = None;
+    if !get_webview_installed(&wine) {
         #[cfg(target_os = "linux")]
-        {
-            let wine = winers::Wine::new(
-                ensure_prefix_exists(app_name).to_str().unwrap(),
-                get_wineroot_string(),
-            );
-            let mut cmd = wine.cmd();
-            cmd.arg("winecfg").arg("/v").arg("win7");
-            cmd.output().expect("Failed to run winecfg");
-        }
+        set_wine_windows_version(wine.as_ref().unwrap(), "win7");
+
         match run_windows_binary(deployment.get_webview_installer_dir(), app_name).await {
             Ok(child) => {
-                deployment.set_webview_installed(true);
-                match child.wait_with_output() {
-                    Ok(_) => Ok(()),
+                set_webview_installed(&wine, true);
+                let output = child.wait_with_output();
+                #[cfg(target_os = "linux")]
+                {
+                    let wine = wine.unwrap();
+                    if let Err(e) = wine.kill() {
+                        eprintln!("Failed to kill wine: {e}");
+                    }
+                }
+                match output {
+                    Ok(output) => {
+                        if !output.status.success() {
+                            return Err(format!(
+                                "Webview installer exited with non-zero exit status: {}",
+                                output.status
+                            ));
+                        }
+                        Ok(())
+                    }
                     Err(e) => Err(format!("Failed to install webview: {}", e.to_string()).into()),
                 }
             }

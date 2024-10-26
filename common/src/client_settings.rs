@@ -4,7 +4,7 @@ use serde::Deserialize;
 
 use crate::app_data::get_deployments_dir;
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Clone)]
 pub struct ClientDeployment {
     pub version: String,
     #[serde(rename = "clientVersionUpload")]
