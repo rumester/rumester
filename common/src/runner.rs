@@ -45,6 +45,7 @@ pub async fn run_windows_binary(binary_file: PathBuf, app_name: &String) -> Resu
     }
 
     let mut cmd = wine.cmd();
+    cmd.env("WINEDLLOVERRIDES", "d3d9,d3d10core,d3d11,dxgi=n");
     cmd.arg(binary_file);
     let child = cmd.spawn().unwrap();
     Ok(child)
