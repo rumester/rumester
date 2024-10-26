@@ -52,6 +52,28 @@ pub fn get_wineroot_string() -> Option<String> {
     }
 }
 
+pub fn get_wine(app_name: &String) -> Wine {
+    winers::Wine::new(
+        ensure_prefix_exists(app_name).to_str().unwrap(),
+        get_wineroot_string(),
+    )
+}
+
+pub fn kill_prefix(app_name: &String) -> Result<(), String> {
+    get_wine(app_name).kill()
+}
+
+pub fn cleanup_app(app_name: &String) -> Result<(), String> {
+    #[cfg(target_os = "linux")]
+    {
+        if let Err(e) = kill_prefix(app_name) {
+            return Err(format!("Failed to kill prefix: {e}"));
+        }
+    }
+
+    Ok(())
+}
+
 pub fn get_download_dir() -> PathBuf {
     let path = get_cache_dir().join("downloads");
     if !path.exists() {

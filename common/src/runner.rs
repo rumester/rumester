@@ -4,8 +4,8 @@ use winers::{get_latest_dxvk, install_dxvk, Wine};
 
 use crate::{
     app_data::{
-        ensure_prefix_exists, get_dxvk_installed, get_webview_installed, get_wineroot_string,
-        set_dxvk_installed, set_webview_installed,
+        get_dxvk_installed, get_webview_installed, get_wine, set_dxvk_installed,
+        set_webview_installed,
     },
     client_settings::ClientDeployment,
 };
@@ -17,8 +17,7 @@ pub async fn run_windows_binary(binary_file: PathBuf, app_name: &String) -> Resu
         let child = std::process::Command::new(binary_file).spawn().unwrap();
         return Ok(child);
     }
-    let prefix_path = ensure_prefix_exists(&app_name);
-    let wine = winers::Wine::new(prefix_path.to_str().unwrap(), get_wineroot_string());
+    let wine = get_wine(&app_name);
     if let Err(e) = wine.init() {
         return Err(format!("Error initializing wine: {}", e));
     }
@@ -66,10 +65,7 @@ pub async fn install_webview2(
     deployment: &ClientDeployment,
 ) -> Result<(), String> {
     #[cfg(target_os = "linux")]
-    let wine = Some(winers::Wine::new(
-        ensure_prefix_exists(app_name).to_str().unwrap(),
-        get_wineroot_string(),
-    ));
+    let wine = Some(get_wine(app_name));
     #[cfg(target_os = "windows")]
     let wine = None;
     if !get_webview_installed(&wine) {
