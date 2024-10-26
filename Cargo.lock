@@ -535,12 +535,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "05f29059c0c2090612e8d742178b0580d2dc940c837851ad723096f87af6663e"
 
 [[package]]
-name = "futures-io"
-version = "0.3.31"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9e5c1b78ca4aae1ac06c48a526a655760685149f0d465d21f37abfe57ce075c6"
-
-[[package]]
 name = "futures-sink"
 version = "0.3.31"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -559,12 +553,9 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9fa08315bb612088cc391249efdc3bc77536f16c91f6cf495e6fbe85b20a4a81"
 dependencies = [
  "futures-core",
- "futures-io",
  "futures-task",
- "memchr",
  "pin-project-lite",
  "pin-utils",
- "slab",
 ]
 
 [[package]]
@@ -2147,8 +2138,8 @@ checksum = "589f6da84c646204747d1270a2a5661ea66ed1cced2631d546fdfb155959f9ec"
 
 [[package]]
 name = "winers"
-version = "0.0.1"
-source = "git+https://github.com/rumester/winers?rev=eebb54c0a5b31c5945bf37ce211abdf4aed51506#eebb54c0a5b31c5945bf37ce211abdf4aed51506"
+version = "1.0.0"
+source = "git+https://github.com/rumester/winers/?rev=f1d166e4b02dbe35bdf0bf3c377884322048b824#f1d166e4b02dbe35bdf0bf3c377884322048b824"
 dependencies = [
  "flate2",
  "reqwest 0.11.27",

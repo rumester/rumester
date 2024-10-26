@@ -4,11 +4,11 @@
   makeWrapper,
   pkg-config,
   openssl,
-  wine64Packages,
+  wineWow64Packages,
 }: let
   toml = (lib.importTOML ./Cargo.toml).workspace.package;
 
-  wine = wine64Packages.staging;
+  wine = wineWow64Packages.staging;
 in
   rustPlatform.buildRustPackage rec {
     pname = toml.name;
@@ -23,13 +23,14 @@ in
 
     buildInputs = [
       openssl
+      wine
     ];
 
     cargoBuildFlags = [ "--workspace" "--bin cli" ];
 
     cargoLock = {
       outputHashes = {
-        "winers-0.0.1" = "sha256-emIDaSr+mnhN/PVvsCvZ2+KK61YUnGoQeuguBWz6jvw=";
+        "winers-1.0.0" = "sha256-Z28U9ovCunhWNUZp9+nvd7ofwwjbsIPrNBrLR2yLLiM=";
       };
       lockFile = ./Cargo.lock;
     };
