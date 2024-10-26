@@ -25,7 +25,7 @@ pub async fn download_package(
     let res = reqwest::get(url).await;
     if let Ok(res) = res {
         if let Ok(data) = res.bytes().await {
-            if let Err(e) = fs::write(&package_dir, data.to_vec()) {
+            if let Err(_) = fs::write(&package_dir, data.to_vec()) {
                 return Err("Failed to write file!".into());
             }
             Ok(data)
