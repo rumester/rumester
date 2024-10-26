@@ -17,6 +17,12 @@ pub fn run_windows_binary(binary_file: PathBuf, app_name: &String) -> Result<Chi
     if let Err(e) = wine.init() {
         panic!("Error initializing wine: {e}");
     }
+    if app_name == "studio" {
+        // for some reason Roblox Studio likes to explode when on 96 DPi why I don't know but hey it fixes it!
+        if let Err(_) = wine.reg_add(r"HKEY_CURRENT_USER\Control Panel\Desktop", "LogPixels", "REG_DWORD", "97") {
+            println!("Failed to set DPI for Studio prefix, this may result in Studio crashing after the splash screen closes.");
+        };
+    }
     let mut cmd = wine.cmd();
     cmd.arg(binary_file);
     let child = cmd.spawn().unwrap();
