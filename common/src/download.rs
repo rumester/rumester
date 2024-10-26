@@ -6,20 +6,35 @@ use std::{
 use bytes::Bytes;
 use zip::ZipArchive;
 
-use crate::{client_settings::ClientDeployment, mirror::Package};
+use crate::{app_data::get_package_dir, client_settings::ClientDeployment, mirror::Package};
 
 pub async fn download_package(
     mirror: &str,
     deployment: &ClientDeployment,
     package: &Package,
-) -> Result<Bytes, reqwest::Error> {
+) -> Result<Bytes, String> {
+    let package_dir = get_package_dir(&package);
+    if let Ok(existing) = fs::read(&package_dir) {
+        return Ok(Bytes::from(existing));
+    }
+
     let url = format!(
         "{mirror}/{}-{}",
         deployment.client_version_upload, package.name
     );
-    let data = reqwest::get(url).await?.bytes().await?;
-
-    Ok(data)
+    let res = reqwest::get(url).await;
+    if let Ok(res) = res {
+        if let Ok(data) = res.bytes().await {
+            if let Err(e) = fs::write(&package_dir, data.to_vec()) {
+                return Err("Failed to write file!".into());
+            }
+            Ok(data)
+        } else {
+            Err("Failed to get data".into())
+        }
+    } else {
+        Err("Failed to download package.".into())
+    }
 }
 
 // TODO: needs better error handling

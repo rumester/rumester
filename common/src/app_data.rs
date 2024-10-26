@@ -1,5 +1,7 @@
 use std::{fs, path::PathBuf};
 
+use crate::mirror::Package;
+
 pub fn get_appdata_dir() -> PathBuf {
     dirs::data_local_dir().unwrap().join("rumester")
 }
@@ -48,6 +50,15 @@ pub fn get_download_dir() -> PathBuf {
     let path = get_cache_dir().join("downloads");
     if !path.exists() {
         fs::create_dir_all(&path).expect("Failed to create download cache dir!");
+    }
+    path
+}
+
+pub fn get_package_dir(package: &Package) -> PathBuf {
+    let packages_dir = get_download_dir().join("packages");
+    let path = packages_dir.join(package.checksum.to_string());
+    if !packages_dir.exists() {
+        fs::create_dir_all(&packages_dir).expect("Failed to create download cache dir!");
     }
     path
 }

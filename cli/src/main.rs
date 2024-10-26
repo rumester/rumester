@@ -66,28 +66,9 @@ async fn main() {
                 latest_version.get_install_dir().join(binary_name),
                 app.into(),
             );
-            if let Ok(mut child) = child {
-                let stdout = child.stdout.as_mut().unwrap();
-                let stderr = child.stderr.as_mut().unwrap();
-
-                loop {
-                    let mut buf = [0; 1024];
-                    let read_bytes = stdout.read(&mut buf).unwrap();
-                    if read_bytes == 0 {
-                        break;
-                    }
-                    print!("{}", String::from_utf8_lossy(&buf[..read_bytes]));
-
-                    let mut err_buf = [0; 1024];
-                    let read_bytes = stderr.read(&mut err_buf).unwrap();
-                    if read_bytes == 0 {
-                        break;
-                    }
-                    eprint!("{}", String::from_utf8_lossy(&err_buf[..read_bytes]));
-                }
-
-                let status = child.wait().unwrap();
-                println!("binary exited with status: {}", status);
+            if let Ok(child) = child {
+                let output = child.wait_with_output().expect("Failed to run child.");
+                println!("binary exited with status: {}", output.status);
             }
         } else {
             println!("Failed to fetch version.");
