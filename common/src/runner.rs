@@ -1,4 +1,4 @@
-use std::{path::PathBuf, process::Child};
+use std::{env, path::PathBuf, process::Child};
 
 use winers::{get_latest_dxvk, install_dxvk, Wine};
 
@@ -46,8 +46,11 @@ pub async fn run_windows_binary(binary_file: PathBuf, app_name: &String) -> Resu
         }
     }
 
+    let winedebug = env::var("WINEDEBUG").unwrap_or_else(|_| "-all".to_string());
+
     let mut cmd = wine.cmd();
     cmd.arg(binary_file);
+    cmd.env("WINEDEBUG", winedebug);
     let child = cmd.spawn().unwrap();
     Ok(child)
 }
