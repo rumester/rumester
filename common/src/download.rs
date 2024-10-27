@@ -8,6 +8,19 @@ use zip::ZipArchive;
 
 use crate::{app_data::get_package_dir, client_settings::ClientDeployment, mirror::Package};
 
+pub fn format_file_size(size: i64) -> String {
+    const UNITS: [&str; 6] = ["B", "KB", "MB", "GB", "TB", "PB"];
+    let mut size = size as f64;
+    let mut unit_index = 0;
+
+    while size >= 1024.0 && unit_index < UNITS.len() - 1 {
+        size /= 1024.0;
+        unit_index += 1;
+    }
+
+    format!("{:.2}{}", size, UNITS[unit_index])
+}
+
 pub async fn download_package(
     mirror: &str,
     deployment: &ClientDeployment,

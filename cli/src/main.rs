@@ -2,23 +2,10 @@ use clap::{arg, command};
 use common::{
     app_data::{get_wine, kill_prefix},
     client_settings::get_client_version,
-    download::{download_package, install_package, write_app_settings_xml},
+    download::{format_file_size, download_package, install_package, write_app_settings_xml},
     mirror::{get_mirror, get_mirror_packages},
     runner::{install_webview2, run_windows_binary},
 };
-
-fn format_file_size(size: i64) -> String {
-    const UNITS: [&str; 6] = ["B", "KB", "MB", "GB", "TB", "PB"];
-    let mut size = size as f64;
-    let mut unit_index = 0;
-
-    while size >= 1024.0 && unit_index < UNITS.len() - 1 {
-        size /= 1024.0;
-        unit_index += 1;
-    }
-
-    format!("{:.2}{}", size, UNITS[unit_index])
-}
 
 #[tokio::main]
 async fn main() {
