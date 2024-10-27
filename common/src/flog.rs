@@ -21,6 +21,7 @@ pub fn get_last_modified_file(dir_path: &str) -> io::Result<Option<String>> {
         .map_or(Ok(None), |name| Ok(Some(name)))
 }
 
+#[cfg(target_os = "linux")]
 pub fn get_log_dir(prefix: PathBuf) -> Result<PathBuf, String> {
     #[cfg(target_os = "linux")]
     {
@@ -30,12 +31,13 @@ pub fn get_log_dir(prefix: PathBuf) -> Result<PathBuf, String> {
 
         Ok(prefix.join(format!("drive_c/users/{}/AppData/Local/Roblox/logs", user)))
     }
-    #[cfg(target_os = "windows")]
-    {
-        let localappdata = std::env::var("LocalAppData").map_err(|e| 
-            format!("Failed to obtain LocalAppData environment variable: {}", e)
-        )?;
+}
 
-        Ok(format!("{}/Roblox/logs", localappdata))
-    }
+#[cfg(target_os = "windows")]
+pub fn get_log_dir() -> Result<PathBuf, String> {
+    let localappdata = std::env::var("LocalAppData").map_err(|e| 
+        format!("Failed to obtain LocalAppData environment variable: {}", e)
+    )?;
+
+    Ok(format!("{}/Roblox/logs", localappdata))
 }
