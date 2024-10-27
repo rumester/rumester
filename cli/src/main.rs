@@ -7,6 +7,19 @@ use common::{
     runner::{install_webview2, run_windows_binary},
 };
 
+fn format_file_size(size: i64) -> String {
+    const UNITS: [&str; 6] = ["B", "KB", "MB", "GB", "TB", "PB"];
+    let mut size = size as f64;
+    let mut unit_index = 0;
+
+    while size >= 1024.0 && unit_index < UNITS.len() - 1 {
+        size /= 1024.0;
+        unit_index += 1;
+    }
+
+    format!("{:.2}{}", size, UNITS[unit_index])
+}
+
 #[tokio::main]
 async fn main() {
     let matches = command!()
@@ -59,8 +72,8 @@ async fn main() {
                                             "Package {}: checksum: {}, size: {}, zipsize: {}",
                                             package.name,
                                             package.checksum,
-                                            package.size,
-                                            package.zipsize
+                                            format_file_size(package.size),
+                                            format_file_size(package.zipsize)
                                         );
                                         if package.name == "RobloxPlayerLauncher.exe" {
                                             return;
