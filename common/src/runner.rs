@@ -18,9 +18,6 @@ pub async fn run_windows_binary(binary_file: PathBuf, app_name: &String) -> Resu
         return Ok(child);
     }
     let wine = get_wine(&app_name);
-    if let Err(e) = wine.init() {
-        return Err(format!("Error initializing wine: {}", e));
-    }
     if app_name == "studio" {
         // for some reason Roblox Studio likes to explode when on 96 DPi why I don't know but hey it fixes it!
         if let Err(e) = wine.reg_add(
