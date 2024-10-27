@@ -30,7 +30,7 @@ in
 
     cargoLock = {
       outputHashes = {
-        "winers-1.0.0" = "sha256-Z28U9ovCunhWNUZp9+nvd7ofwwjbsIPrNBrLR2yLLiM=";
+        "winers-1.0.0" = "sha256-3TBmpbcsPlgiNfZ+WtRXc4rgWZ3xtVjAA4P2rwED7Vs=";
       };
       lockFile = ./Cargo.lock;
     };
