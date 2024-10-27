@@ -10,7 +10,7 @@
 
   wine = wineWow64Packages.staging;
 in
-  rustPlatform.buildRustPackage rec {
+  rustPlatform.buildRustPackage {
     pname = toml.name;
     inherit (toml) version;
 
@@ -35,7 +35,7 @@ in
       lockFile = ./Cargo.lock;
     };
 
-    meta.mainProgram = pname;
+    meta.mainProgram = "cli";
 
     postInstall = ''
       wrapProgram $out/bin/cli \
