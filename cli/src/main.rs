@@ -136,6 +136,7 @@ async fn main() {
                 _ => todo!(),
             }
         } else {
+            println!("No operation was specified, re-run with --help to receive the full list of options.")
         }
     }
 }
