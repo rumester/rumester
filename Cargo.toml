@@ -4,3 +4,6 @@ members = ["cli", "common"]
 [workspace.package]
 name = "rumester"
 version = "0.0.1"
+
+[profile.release]
+strip = true
