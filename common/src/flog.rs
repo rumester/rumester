@@ -58,5 +58,8 @@ pub fn begin_flog_watch(app_name: &String) -> Hotwatch {
 
 pub fn get_log_dir(app_name: &String) -> Result<PathBuf, String> {
     let log_dir = get_local_appdata_dir(app_name).join("Roblox/logs");
+    if !log_dir.exists() {
+        fs::create_dir_all(&log_dir).unwrap();
+    }
     Ok(log_dir)
 }
