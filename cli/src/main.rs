@@ -12,7 +12,10 @@ use common::{
 async fn main() {
     let matches = command!()
         .arg(arg!([app] "Roblox app to operate on").value_parser(["player", "studio"]))
-        .arg(arg!([operation] "Operation to run").value_parser(["run", "kill", "winecfg"]))
+        .arg(
+            arg!([operation] "Operation to run")
+                .value_parser(["run", "kill", "winecfg", "regedit", "delete"]),
+        )
         .get_matches();
 
     if let Some(app) = matches.get_one::<String>("app") {
@@ -121,6 +124,22 @@ async fn main() {
                             .arg("winecfg")
                             .output()
                             .expect("Failed to run winecfg");
+                    }
+                }
+                "regedit" => {
+                    #[cfg(target_os = "linux")]
+                    {
+                        get_wine(app)
+                            .cmd()
+                            .arg("regedit")
+                            .output()
+                            .expect("Failed to run regedit");
+                    }
+                }
+                "delete" => {
+                    #[cfg(target_os = "linux")]
+                    {
+                        get_wine(app).delete().unwrap();
                     }
                 }
                 _ => todo!(),
