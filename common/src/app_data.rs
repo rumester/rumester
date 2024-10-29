@@ -133,9 +133,7 @@ pub fn set_webview_installed(wine: &Option<Wine>, installed: bool) {
 
 pub fn get_local_appdata_dir(app_name: &String) -> PathBuf {    
     #[cfg(target_os = "windows")] {
-        let local_data_dir = dirs::data_local_dir().unwrap();
-        let log_dir = local_data_dir.join("Roblox/Logs");
-        return log_dir;
+        return dirs::data_local_dir().unwrap();
     }
 
     let username = whoami::realname();
