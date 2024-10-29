@@ -2,7 +2,8 @@ use clap::{arg, command};
 use common::{
     app_data::{get_wine, kill_prefix},
     client_settings::get_client_version,
-    download::{format_file_size, download_package, install_package, write_app_settings_xml},
+    download::{download_package, format_file_size, install_package, write_app_settings_xml},
+    flog::begin_flog_watch,
     mirror::{get_mirror, get_mirror_packages},
     runner::{install_webview2, run_windows_binary},
 };
@@ -89,6 +90,8 @@ async fn main() {
                         } else {
                             println!("Installed Webview2.");
                         }
+                        // we need to keep watcher in scope, or it gets deleted and stops working
+                        let _watcher = begin_flog_watch(app);
                         let child = run_windows_binary(
                             latest_version.get_install_dir().join(binary_name),
                             app.into(),

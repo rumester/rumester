@@ -130,3 +130,19 @@ pub fn get_webview_installed(wine: &Option<Wine>) -> bool {
 pub fn set_webview_installed(wine: &Option<Wine>, installed: bool) {
     write_state_file(get_webview_state_dir(wine), installed);
 }
+
+pub fn get_local_appdata_dir(app_name: &String) -> PathBuf {    
+    #[cfg(target_os = "windows")] {
+        let local_data_dir = dirs::data_local_dir().unwrap();
+        let log_dir = local_data_dir.join("Roblox/Logs");
+        return log_dir;
+    }
+
+    let username = whoami::realname();
+    let wine_prefix = ensure_prefix_exists(app_name);
+    let log_dir = wine_prefix
+        .join("drive_c/users/")
+        .join(username)
+        .join("AppData/Local");
+    log_dir
+}

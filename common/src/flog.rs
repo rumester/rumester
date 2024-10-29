@@ -1,43 +1,62 @@
 use std::fs;
-use std::io;
-use std::path::Path;
+use std::io::Read;
+use std::io::Seek;
+use std::io::SeekFrom;
 use std::path::PathBuf;
 
-pub fn get_last_modified_file(dir_path: &str) -> io::Result<Option<String>> {
-    let path = Path::new(dir_path);
-    
-    fs::read_dir(path)?
-        .filter_map(|entry| {
-            let entry = entry.ok()?;
-            let metadata = entry.metadata().ok()?;
-            if metadata.is_file() {
-                Some((entry.file_name().to_string_lossy().into_owned(), metadata.modified().ok()?))
-            } else {
-                None
+use hotwatch::notify::Event;
+use hotwatch::EventKind;
+use hotwatch::Hotwatch;
+
+use crate::app_data::get_local_appdata_dir;
+
+pub fn begin_flog_watch(app_name: &String) -> Hotwatch {
+    let dir = get_log_dir(app_name).unwrap();
+    println!("Watching {}", dir.to_str().unwrap());
+    let mut watch = Hotwatch::new().unwrap();
+    let mut log_file_dir: Option<PathBuf> = None;
+    let mut file: Option<fs::File> = None;
+    let mut pos: u64 = 0;
+    watch
+        .watch(dir, move |event: Event| {
+            match event.kind {
+                EventKind::Create(_) => {
+                    println!("Log file created");
+                    if log_file_dir.is_some() {
+                        return;
+                    }
+
+                    log_file_dir = Some(event.paths.get(0).unwrap().to_path_buf());
+                    let log_file_dir = log_file_dir.as_ref().unwrap();
+                    file = Some(fs::File::open(log_file_dir).unwrap());
+                    let file = file.as_ref().unwrap();
+                    let data = fs::read_to_string(log_file_dir).unwrap();
+                    pos = file.metadata().unwrap().len();
+                    print!("{data}");
+                }
+                EventKind::Modify(_) => {
+                    if let Some(file) = &mut file {
+                        file.seek(SeekFrom::Start(pos)).unwrap();
+
+                        pos = file.metadata().unwrap().len();
+
+                        let mut new_contents = String::new();
+                        file.read_to_string(&mut new_contents).unwrap();
+
+                        print!("{new_contents}");
+                    }
+                }
+                _ => {}
+            }
+            if let EventKind::Create(_) = event.kind {
+                // OK, great, now its time to tail it.
             }
         })
-        .max_by_key(|&(_, modified_time)| modified_time)
-        .map(|(file_name, _)| file_name)
-        .map_or(Ok(None), |name| Ok(Some(name)))
+        .expect("Failed to watch log dir");
+    watch
 }
 
-#[cfg(target_os = "linux")]
-pub fn get_log_dir(prefix: PathBuf) -> Result<PathBuf, String> {
-    #[cfg(target_os = "linux")]
-    {
-        let user = std::env::var("USER").map_err(|e| 
-            format!("Failed to obtain USER environment variable: {}", e)
-        )?;
-
-        Ok(prefix.join(format!("drive_c/users/{}/AppData/Local/Roblox/logs", user)))
-    }
-}
-
-#[cfg(target_os = "windows")]
-pub fn get_log_dir() -> Result<PathBuf, String> {
-    let localappdata = std::env::var("LocalAppData").map_err(|e| 
-        format!("Failed to obtain LocalAppData environment variable: {}", e)
-    )?;
-
-    Ok(format!("{}/Roblox/logs", localappdata))
+pub fn get_log_dir(app_name: &String) -> Result<PathBuf, String> {
+    let log_dir = get_local_appdata_dir(app_name).join("Roblox/logs");
+    Ok(log_dir)
 }
