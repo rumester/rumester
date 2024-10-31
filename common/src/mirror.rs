@@ -46,7 +46,10 @@ impl Package {
             "extracontent-models.zip" => "ExtraContent/models",
             "extracontent-textures.zip" => "ExtraContent/textures",
             "redist.zip" => ".",
-            _ => todo!()
+            "content-platform-dictionaries.zip" => {
+                "PlatformContent/pc/shared_compression_dictionaries"
+            }
+            _ => todo!(),
         };
 
         res.into()
