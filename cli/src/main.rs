@@ -88,11 +88,7 @@ async fn main() {
                             }
                             write_app_settings_xml(&latest_version);
                         }
-                        if install_webview2(app.into(), &latest_version).await.is_err() {
-                            eprintln!("Failed to install Webview2!");
-                        } else {
-                            println!("Installed Webview2.");
-                        }
+                        install_webview2(app.into(), &latest_version).await.expect("Failed to install Webview2!");
 
                         // Add CTRL+C handler on debug builds to kill the Roblox process
                         #[cfg(debug_assertions)]
