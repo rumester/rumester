@@ -84,7 +84,6 @@ pub fn query_reg_key(app_name: &String, key: &str, value: &str) -> Result<Option
             .args(["query", key, "/v", value])
             .output()
             .map_err(|e| format!("Failed to execute reg: {}", e))?;
-
         if !output.status.success() {
             let stderr = String::from_utf8_lossy(&output.stderr);
             return Err(format!("Failed to query registry key: {}", stderr));
@@ -182,19 +181,45 @@ pub fn set_dxvk_installed(wine: &Wine, installed: bool) {
     write_state_file(get_dxvk_state_dir(wine), installed)
 }
 
-pub fn get_webview_state_dir(wine: &Option<Wine>) -> PathBuf {
-    if let Some(wine) = wine {
-        return wine.prefix_path.join("webview_state");
+
+fn webview_version_check(version: &str) -> bool {
+    let minimum_parts: Vec<i32> = "109.0.1518.140"
+        .split('.')
+        .map(|s| s.parse::<i32>().unwrap())
+        .collect();
+    let version_parts: Vec<i32> = version
+        .split('.')
+        .map(|s| s.parse::<i32>().unwrap())
+        .collect();
+
+    if minimum_parts[0] < version_parts[0] {
+        return true;
+    } else {
+        for (minv, userv) in minimum_parts.iter().zip(version_parts.iter()) {
+            if (minv <= userv) {
+                continue;
+            } else {
+                return false;
+            }
+        }
+        return true;
     }
-    get_appdata_dir().join("webview_state")
 }
 
-pub fn get_webview_installed(wine: &Option<Wine>) -> bool {
-    read_state_file(get_webview_state_dir(wine))
-}
+pub fn get_webview_installed(app_name: &String) -> bool {
+    let webview_version = query_reg_key(app_name, r"HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}", "pv");
 
-pub fn set_webview_installed(wine: &Option<Wine>, installed: bool) {
-    write_state_file(get_webview_state_dir(wine), installed);
+    match webview_version {
+        Ok(Some(version)) => {
+            return webview_version_check(&version)
+        },
+        Ok(None) => {
+            return false;
+        },
+        Err(_) => {
+            return false;
+        }
+    };
 }
 
 pub fn get_local_appdata_dir(app_name: &String) -> PathBuf {    
