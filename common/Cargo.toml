@@ -10,5 +10,5 @@ hotwatch = "0.5.0"
 reqwest = { version = "0.12.8", features = ["json"] }
 serde = { version = "1.0.213", features = ["serde_derive"] }
 whoami = "1.5.2"
-winers = { git = "https://github.com/rumester/winers/", version = "1.0.0", rev = "27a01309d90addfcafaf625922ef410741bd35bb" }
+winers = { git = "https://github.com/rumester/winers/", version = "1.0.0", rev = "a550960cd787474771c80e51e465d48927080132" }
 zip = "2.2.0"
