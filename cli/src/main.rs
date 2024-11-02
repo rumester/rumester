@@ -1,9 +1,8 @@
 use std::sync::{
-    Arc,
     atomic::{
         AtomicBool,
         Ordering
-    }
+    }, Arc
 };
 
 use clap::{arg, command};
@@ -98,7 +97,12 @@ async fn main() {
                             let r = running.clone();
                             ctrlc::set_handler(move || {
                                 r.store(false, Ordering::SeqCst);
-                                kill_prefix(&app_clone).expect(format!("Failed to kill {}", &app_clone).as_str());
+                                let output = kill_prefix(&app_clone)
+                                    .map_err(|e| format!("Failed to kill {}: {}", &app_clone, e));
+                                if let Err(e) = output {
+                                    eprintln!("{}", e);
+                                };
+                                std::process::exit(0);
                             }).expect("Error setting Ctrl-C handler");
                         }
 
