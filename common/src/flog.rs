@@ -33,6 +33,7 @@ pub fn begin_flog_watch(app_name: &String) -> Hotwatch {
                 pos = file.metadata().unwrap().len();
                 print!("{data}");
             }
+            #[cfg(target_os = "linux")]
             EventKind::Modify(_) => {
                 if let Some(file) = &mut file {
                     file.seek(SeekFrom::Start(pos)).unwrap();
