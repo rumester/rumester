@@ -1,3 +1,3 @@
 # rumester
 
-rumester is a user-friendly bootstrapper for Roblox (+ Studio) on Linux.
+rumester is a Roblox (+ Studio) bootstrapper for Linux and Windows without drawbacks.
