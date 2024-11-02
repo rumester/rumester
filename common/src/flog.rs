@@ -14,7 +14,7 @@ use crate::app_data::get_local_appdata_dir;
 pub fn begin_flog_watch(app_name: &String) -> Hotwatch {
     let dir = get_log_dir(app_name).unwrap();
     println!("Watching {}", dir.to_str().unwrap());
-    let mut watch = Hotwatch::new_with_custom_delay(time::Duration::from_millis(500)).unwrap();
+    let mut watch = Hotwatch::new_with_custom_delay(time::Duration::from_millis(500)).expect("hotwatch failed to init");
     let mut log_file_dir: Option<PathBuf> = None;
     let mut file: Option<fs::File> = None;
     let mut pos: u64 = 0;
