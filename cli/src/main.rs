@@ -133,9 +133,7 @@ async fn main() {
                         get_wine(app).delete().unwrap();
                     }
                 }
-                _ => {
-                    println!("Operation specified was invalid, re-run with --help to receive the full list of operations.")
-                },
+                _ => println!("Operation specified was invalid, re-run with --help to receive the full list of operations."),
             }
         } else {
             println!("No operation was specified, re-run with --help to receive the full list of operations.")
