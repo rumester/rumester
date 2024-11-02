@@ -1,6 +1,6 @@
 use clap::{arg, command};
 use common::{
-    app_data::{get_binary_name, get_wine, kill_prefix},
+    app_data::{get_binary_name, get_binary_type, get_wine, kill_prefix},
     client_settings::get_client_version,
     download::{download_package, format_file_size, install_package, write_app_settings_xml},
     flog::begin_flog_watch,
@@ -19,12 +19,8 @@ async fn main() {
         .get_matches();
 
     if let Some(app) = matches.get_one::<String>("app") {
-        let binary_type = match app.as_str() {
-            "player" => "WindowsPlayer",
-            "studio" => "WindowsStudio64",
-            _ => panic!("Invalid binary type."),
-        };
-        let binary_name = get_binary_name(app.as_str());
+        let binary_type = get_binary_type(app);
+        let binary_name = get_binary_name(app);
 
         if let Some(operation) = matches.get_one::<String>("operation") {
             match operation.as_str() {

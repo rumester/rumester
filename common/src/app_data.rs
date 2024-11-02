@@ -59,6 +59,14 @@ pub fn get_wine(app_name: &String) -> Wine {
     )
 }
 
+pub fn get_binary_type(app: &str) -> &'static str {
+    match app {
+        "player" => "WindowsPlayer",
+        "studio" => "WindowsStudio64",
+        _ => panic!("Invalid binary type."),
+    }
+}
+
 pub fn get_binary_name(app: &str) -> &'static str {
     match app {
         "player" => "RobloxPlayerBeta.exe",
