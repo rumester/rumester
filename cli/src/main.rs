@@ -1,6 +1,6 @@
 use clap::{arg, command};
 use common::{
-    app_data::{get_wine, kill_prefix},
+    app_data::{get_binary_name, get_wine, kill_prefix},
     client_settings::get_client_version,
     download::{download_package, format_file_size, install_package, write_app_settings_xml},
     flog::begin_flog_watch,
@@ -24,11 +24,7 @@ async fn main() {
             "studio" => "WindowsStudio64",
             _ => panic!("Invalid binary type."),
         };
-        let binary_name = match app.as_str() {
-            "player" => "RobloxPlayerBeta.exe",
-            "studio" => "RobloxStudioBeta.exe",
-            _ => panic!("Invalid binary type."),
-        };
+        let binary_name = get_binary_name(app.as_str());
 
         if let Some(operation) = matches.get_one::<String>("operation") {
             match operation.as_str() {
@@ -113,8 +109,7 @@ async fn main() {
                     }
                 }
                 "kill" => {
-                    #[cfg(target_os = "linux")]
-                    kill_prefix(app).expect("Failed to kill wine prefix");
+                    kill_prefix(app).expect(format!("Failed to kill {}", app).as_str());
                 }
                 "winecfg" => {
                     #[cfg(target_os = "linux")]

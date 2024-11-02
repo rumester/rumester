@@ -1,4 +1,4 @@
-use std::{fs, path::PathBuf};
+use std::{process, fs, path::PathBuf};
 
 use winers::Wine;
 
@@ -59,8 +59,31 @@ pub fn get_wine(app_name: &String) -> Wine {
     )
 }
 
+pub fn get_binary_name(app: &str) -> &'static str {
+    match app {
+        "player" => "RobloxPlayerBeta.exe",
+        "studio" => "RobloxStudioBeta.exe",
+        _ => panic!("Invalid binary type.")
+    }
+}
+
 pub fn kill_prefix(app_name: &String) -> Result<(), String> {
-    get_wine(app_name).kill()
+    #[cfg(target_os = "linux")]
+    get_wine(app_name).kill();
+    #[cfg(target_os = "windows")]
+    {
+        let binary_name = get_binary_name(&app_name);
+        let output = process::Command::new("taskkill").args(["/IM", &binary_name, "/F"])
+            .output()
+            .map_err(|e| format!("Failed to execute wine: {}", e))?;
+
+        if !output.status.success() {
+            let stderr = String::from_utf8_lossy(&output.stderr);
+            return Err(format!("Killing {} failed: {}", &app_name, stderr));
+        }
+
+        Ok(())
+    }
 }
 
 pub fn cleanup_app(app_name: &String) -> Result<(), String> {
