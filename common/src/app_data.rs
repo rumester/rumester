@@ -75,8 +75,36 @@ pub fn get_binary_name(app: &str) -> &'static str {
     }
 }
 
-pub fn get_reg_key(app_name: &String, key: &str, value: &str) {
+pub fn query_reg_key(app_name: &String, key: &str, value: &str) -> Result<Option<String>, String> {
+    #[cfg(target_os = "linux")] {
+        return get_wine(app_name).reg_query(key, value);
+    }
+    #[cfg(target_os = "windows")] {
+        let output = process::Command::new("reg")
+            .args(["query", key, "/v", value])
+            .output()
+            .map_err(|e| format!("Failed to execute reg: {}", e))?;
 
+        if !output.status.success() {
+            let stderr = String::from_utf8_lossy(&output.stderr);
+            return Err(format!("Failed to query registry key: {}", stderr));
+        } else {
+            let stdout = String::from_utf8_lossy(&output.stdout);
+            
+            for line in stdout.lines() {
+                if line.contains(value) {
+                    let tokens: Vec<&str> = line.split_whitespace().collect();
+                    if tokens.len() >= 3 {
+                        return Ok(Some(tokens[2].to_string()));
+                    } else {
+                        return Err("Unexpected format in output.".to_string());
+                    }
+                }
+            }
+        }
+
+        Ok(None)
+    }
 }
 
 pub fn kill_prefix(app_name: &String) -> Result<(), String> {
@@ -90,7 +118,7 @@ pub fn kill_prefix(app_name: &String) -> Result<(), String> {
         let output = process::Command::new("taskkill")
             .args(["/IM", &binary_name, "/F"])
             .output()
-            .map_err(|e| format!("Failed to execute wine: {}", e))?;
+            .map_err(|e| format!("Failed to execute taskkill: {}", e))?;
 
         if !output.status.success() {
             let stderr = String::from_utf8_lossy(&output.stderr);
