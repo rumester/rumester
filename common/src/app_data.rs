@@ -75,9 +75,15 @@ pub fn get_binary_name(app: &str) -> &'static str {
     }
 }
 
+pub fn get_reg_key(app_name: &String, key: &str, value: &str) {
+
+}
+
 pub fn kill_prefix(app_name: &String) -> Result<(), String> {
     #[cfg(target_os = "linux")]
-    get_wine(app_name).kill();
+    {
+        get_wine(app_name).kill()
+    }
     #[cfg(target_os = "windows")]
     {
         let binary_name = get_binary_name(&app_name);
