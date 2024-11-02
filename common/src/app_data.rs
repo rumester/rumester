@@ -87,7 +87,8 @@ pub fn kill_prefix(app_name: &String) -> Result<(), String> {
     #[cfg(target_os = "windows")]
     {
         let binary_name = get_binary_name(&app_name);
-        let output = process::Command::new("taskkill").args(["/IM", &binary_name, "/F"])
+        let output = process::Command::new("taskkill")
+            .args(["/IM", &binary_name, "/F"])
             .output()
             .map_err(|e| format!("Failed to execute wine: {}", e))?;
 
