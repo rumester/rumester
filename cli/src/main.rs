@@ -1,3 +1,11 @@
+use std::sync::{
+    Arc,
+    atomic::{
+        AtomicBool,
+        Ordering
+    }
+};
+
 use clap::{arg, command};
 use common::{
     app_data::{get_binary_name, get_binary_type, get_wine, kill_prefix},
@@ -85,6 +93,19 @@ async fn main() {
                         } else {
                             println!("Installed Webview2.");
                         }
+
+                        // Add CTRL+C handler on debug builds to kill the Roblox process
+                        #[cfg(debug_assertions)]
+                        {
+                            let app_clone = app.clone();
+                            let running = Arc::new(AtomicBool::new(true));
+                            let r = running.clone();
+                            ctrlc::set_handler(move || {
+                                r.store(false, Ordering::SeqCst);
+                                kill_prefix(&app_clone).expect(format!("Failed to kill {}", &app_clone).as_str());
+                            }).expect("Error setting Ctrl-C handler");
+                        }
+
                         // we need to keep watcher in scope, or it gets deleted and stops working
                         let _watcher = begin_flog_watch(app);
                         let child = run_windows_binary(
